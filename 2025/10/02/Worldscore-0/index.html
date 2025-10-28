@@ -1,0 +1,867 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>WordScore 论文解读 | Hongbo Ma's Blog</title><meta name="author" content="Hongbo Ma"><meta name="copyright" content="Hongbo Ma"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="WorldScore: A Unified Evaluation Benchmark for World Generation Overview   image  (1)统一性：将世界生成任务归纳拆解成了相机位姿变化下的下一场景生成任务，由此将3d生成，4d生成，视频生成等等世界生成方法统一化了 (2)测试维度：  可控性(controllability) 质量(quality) 动态性(dyna">
+<meta property="og:type" content="article">
+<meta property="og:title" content="WordScore 论文解读">
+<meta property="og:url" content="https://ma-hongbo.github.io/2025/10/02/Worldscore-0/index.html">
+<meta property="og:site_name" content="Hongbo Ma&#39;s Blog">
+<meta property="og:description" content="WorldScore: A Unified Evaluation Benchmark for World Generation Overview   image  (1)统一性：将世界生成任务归纳拆解成了相机位姿变化下的下一场景生成任务，由此将3d生成，4d生成，视频生成等等世界生成方法统一化了 (2)测试维度：  可控性(controllability) 质量(quality) 动态性(dyna">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ma-hongbo.github.io/img/profile.png">
+<meta property="article:published_time" content="2025-10-02T07:00:00.000Z">
+<meta property="article:modified_time" content="2025-10-28T13:18:03.053Z">
+<meta property="article:author" content="Hongbo Ma">
+<meta property="article:tag" content="世界模型">
+<meta property="article:tag" content="计算机视觉">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ma-hongbo.github.io/img/profile.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "WordScore 论文解读",
+  "url": "https://ma-hongbo.github.io/2025/10/02/Worldscore-0/",
+  "image": "https://ma-hongbo.github.io/img/profile.png",
+  "datePublished": "2025-10-02T07:00:00.000Z",
+  "dateModified": "2025-10-28T13:18:03.053Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Hongbo Ma",
+      "url": "https://ma-hongbo.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/blogs/img/favicon.png"><link rel="canonical" href="https://ma-hongbo.github.io/2025/10/02/Worldscore-0/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/blogs/css/index.css?v=5.5.1"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/blogs/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: 'Copy Successful',
+    error: 'Copy Failed',
+    noSupport: 'Browser Not Supported'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: 'Just now',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.12.0/dist/infinitegrid.min.js',
+    buttonText: 'Load More'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'WordScore 论文解读',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.0"></head><body><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/blogs/"><span class="site-name">Hongbo Ma's Blog</span></a><a class="nav-page-title" href="/blogs/"><span class="site-name">WordScore 论文解读</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  Back to Home</span></span></a></span><div id="menus"></div></nav><div id="post-info"><h1 class="post-title">WordScore 论文解读</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2025-10-02T07:00:00.000Z" title="Created 2025-10-02 15:00:00">2025-10-02</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2025-10-28T13:18:03.053Z" title="Updated 2025-10-28 21:18:03">2025-10-28</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/blogs/categories/%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/">论文解读</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post Views:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1
+id="worldscore-a-unified-evaluation-benchmark-for-world-generation">WorldScore:
+A Unified Evaluation Benchmark for World Generation</h1>
+<h2 id="overview">Overview</h2>
+<figure>
+<img src="1.jpeg" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<p>(1)统一性：将<code>世界生成任务</code>归纳拆解成了<code>相机位姿变化下</code>的<code>下一场景生成任务</code>，由此将3d生成，4d生成，视频生成等等世界生成方法统一化了</p>
+<p>(2)测试维度：</p>
+<ul>
+<li><p>可控性(controllability)</p></li>
+<li><p>质量(quality)</p></li>
+<li><p>动态性(dynamics)</p></li>
+</ul>
+<p>(3)大规模，多样的测试示例：3,000
+个高质量的测试示例；涵盖了各种世界，包括静态和动态、室内和室外、照片写实和风格化景</p>
+<h3 id="挑战">挑战</h3>
+<p>视频生成、3D 场景生成和 4D
+场景生成初是为特定任务设计，虽然具备作为“世界生成系统”的潜力，但是在世界生成概念扩展的今天，难以适应既能够<strong>无缝集成多个不同场景</strong>(综合性)，又能够<strong>具有详细空间布局控制</strong>(控制性)的任务需求。</p>
+<p>解决这个问题，首先需要的就是一个benchmark！</p>
+<h4 id="现有benchmark的缺陷">现有benchmark的缺陷</h4>
+<h5 id="视频生成方向">视频生成方向</h5>
+<p>评估仅限于单个场景，无法衡量模型在生成多场景、具有复杂空间关系的“世界”时的能力</p>
+<h5 id="d4d场景生成方向">3d,4d场景生成方向</h5>
+<p>评估基准缺少关键组件(如摄像机规格和参考图像)。这使得这些基准与许多先进的
+3D/4D 场景生成方法不兼容</p>
+<h3 id="worldscore-benchmark">WorldScore Benchmark</h3>
+<p>核心：将世界生成任务分解为一系列下一场景生成任务</p>
+<h4 id="统一性">统一性</h4>
+<p>每一个step被描述为 <span
+class="math inline">(<em>c</em><em>u</em><em>r</em><em>r</em><em>e</em><em>n</em><em>t</em><em>s</em><em>c</em><em>e</em><em>n</em><em>e</em>, <em>n</em><em>e</em><em>x</em><em>t</em><em>s</em><em>c</em><em>e</em><em>n</em><em>e</em>, <em>l</em><em>a</em><em>y</em><em>o</em><em>u</em><em>t</em>)</span></p>
+<p>为了不同方法之间的统一：</p>
+<ul>
+<li><p>为每一个<code>step</code>中的<code>current scene</code>提供了<code>image prompt</code>和<code>text prompt</code></p></li>
+<li><p>为每一个<code>step</code>中的<code>layout</code>提供了<code>camera matrices</code>和<code>textual description</code></p></li>
+</ul>
+<p>无论输入是什么，<strong>不同方法之间的输出是统一</strong>的
+i.e. 渲染或者生成的video</p>
+<h4 id="衡量标准">衡量标准</h4>
+<ul>
+<li><p>可控性(controllability)：衡量生成的世界对控制输入的依从性</p></li>
+<li><p>质量(quality)：衡量逼真度和一致性</p></li>
+<li><p>动态性(dynamics)：衡量生成的世界表现出准确和稳定运动的程度</p></li>
+</ul>
+<p>三大衡量标准里面所有指标加起来共十个metrics</p>
+<h3 id="主要贡献">主要贡献</h3>
+<p>（1）提出了第一个世界生成基准WorldScore，允许对包括各类模型在内的各种方法进行统一评估</p>
+<p>（2）提供了一个高质量、多样化的数据集，涵盖了具有多种视觉风格的静态和动态场景</p>
+<p>（3）引入了 WorldScore 指标，它包括可控性、质量和动态性</p>
+<figure>
+<img src="2.jpeg" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<p>（4）在17个开源模型和2个闭源模型上评估，指导世界模型的研究，提出该研究领域的挑战</p>
+<figure>
+<img src="4.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<h2 id="worldscore-benchmark-1">WorldScore Benchmark</h2>
+<figure>
+<img src="3.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<h3 id="整体概述">整体概述</h3>
+<p>包括三个部分：</p>
+<ul>
+<li><ol type="1">
+<li>标准化的世界规范</li>
+</ol></li>
+<li><ol start="2" type="1">
+<li>精心策划的数据集</li>
+</ol></li>
+<li><ol start="3" type="1">
+<li>多方面的指标</li>
+</ol></li>
+</ul>
+<h4 id="世界规范">世界规范</h4>
+<h5 id="世界规范的定义">世界规范的定义</h5>
+<p>世界生成任务被分解为一系列下一场景生成任务，其中每个步骤由三元组
+<span class="math inline">(𝒞, 𝒩, ℒ)</span> 构成，其中</p>
+<ul>
+<li><p><span class="math inline">𝒞 = {<em>I</em>, 𝒫}</span></p>
+<ul>
+<li><span class="math inline">𝒞</span>: 当前场景</li>
+<li><span class="math inline"><em>I</em></span>：当前场景的图像</li>
+<li><span class="math inline"><em>P</em></span>：当前场景的文本提示</li>
+</ul></li>
+<li><p><span class="math inline"><em>N</em></span>
+表示下一场景的文本提示</p></li>
+<li><p><span class="math inline">ℒ = {𝒯, 𝒴}</span></p>
+<ul>
+<li><span class="math inline">ℒ</span>:布局</li>
+<li><span
+class="math inline">𝒯 = (<em>C</em><sub>1</sub>, <em>C</em><sub>2</sub>, ⋅ ⋅ ⋅, <em>C</em><sub><em>N</em></sub>)</span></li>
+<li><span
+class="math inline">𝒯</span>:每一个位置相机的相机矩阵集合（<span
+class="math inline"><em>C</em><sub><em>i</em></sub></span>
+表示一个相机矩阵）</li>
+<li><span class="math inline"><em>Y</em></span>：相机运动的文本提示</li>
+</ul></li>
+</ul>
+<p>然后，世界生成模型被指示生成一个视频： <span
+class="math display"><em>V</em> = <em>g</em><sub><em>w</em><em>o</em><em>r</em><em>l</em><em>d</em></sub>(<em>w</em><sub><em>p</em><em>r</em><em>o</em><em>c</em></sub>(𝒞, 𝒩, ℒ))</span></p>
+<p><span class="math inline"><em>V</em></span> 表示一个视频 <span
+class="math inline"><em>g</em><sub><em>w</em><em>o</em><em>r</em><em>l</em><em>d</em></sub></span>
+表示世界生成模型 <span
+class="math inline"><em>w</em><sub><em>p</em><em>r</em><em>o</em><em>c</em></sub></span>
+表示模型特定的预处理</p>
+<h5 id="模型特定的预处理">模型特定的预处理</h5>
+<p>评估模型涵盖3D场景生成、4D场景生成和视频(I2V,T2V)生成，每种模型都有不同的输入形式需求</p>
+<p>为了适配这些不同的输入形式，<span
+class="math inline"><em>w</em><sub><em>p</em><em>r</em><em>o</em><em>c</em></sub></span>
+会确保每个模型接收到其所需格式的输入</p>
+<p>具体来说，<span
+class="math inline"><em>w</em><sub><em>p</em><em>r</em><em>o</em><em>c</em></sub></span>
+对输入进行如下标准化处理：</p>
+<h6 id="对参考图像i">对参考图像<span
+class="math inline"><em>I</em></span></h6>
+<ol type="1">
+<li><p>会被居中裁剪并调整大小，以匹配每个模型所需的分辨率</p></li>
+<li><p>既作为视觉风格参考，也作为I2V模型所需的输入</p></li>
+<li><p>因为T2V模型被视为忽略图像信号的I2V模型，所以T2V不接收<span
+class="math inline"><em>I</em></span></p></li>
+</ol>
+<h6 id="对布局l">对布局<span class="math inline"><em>L</em></span></h6>
+<ol type="1">
+<li><p>对于接受显式相机控制信号的模型,<span
+class="math inline"><em>w</em><sub><em>p</em><em>r</em><em>o</em><em>c</em></sub></span>会将<strong>对齐变换</strong>后的相机位姿<span
+class="math inline">𝒯<sup>′</sup></span>
+提供给那些模型，以保证在不同相机类型之间对齐，</p></li>
+<li><p>对于不支持显式相机控制的模型，只提供文本描述<span
+class="math inline"><em>Y</em></span></p></li>
+</ol>
+<h6 id="对于下一场景的文本提示n">对于下一场景的文本提示<span
+class="math inline"><em>N</em></span>：</h6>
+<ol type="1">
+<li><p>对于3D/4D模型，由于它们都接受相机矩阵作为输入，<span
+class="math inline"><em>w</em><sub><em>p</em><em>r</em><em>o</em><em>c</em></sub></span>
+不会对<span class="math inline"><em>N</em></span>做任何改动</p></li>
+<li><p>对于3D/4D模型外不接受相机矩阵输入的<strong>视频模型</strong>，<span
+class="math inline"><em>w</em><sub><em>p</em><em>r</em><em>o</em><em>c</em></sub></span>
+会在<span
+class="math inline"><em>N</em></span>中加入相机运动相关的描述</p></li>
+</ol>
+<h5 id="两种任务静态和动态世界">两种任务———静态和动态世界</h5>
+<p>动态性与可控性和质量方面的性质不同，不适合作为一种<code>metrcis</code>进行评估</p>
+<p>所以从任务上对于动态和静态进行区分：</p>
+<ul>
+<li><p>静态世界生成:指示<strong>模型生成可变长度的场景序列</strong>。此时，<span
+class="math inline"><em>N</em></span>描述了新的场景内容，<span
+class="math inline"><em>L</em></span>描述了大的相机移动</p></li>
+<li><p>动态世界生成:指示<strong>模型生成场景内运动以进行动态性评估</strong>。此时，<span
+class="math inline"><em>N</em></span>描述了与<span
+class="math inline"><em>C</em></span>相同的场景内容，但带有动态变化（e.g. animal
+moving）。<span
+class="math inline"><em>L</em></span>明确指定了一个固定的相机位置，<strong>没有任何相机移动</strong></p></li>
+</ul>
+<h4 id="数据集策划">数据集策划</h4>
+<h5 id="mathcalc-的策划"><span class="math inline">𝒞</span> 的策划</h5>
+<p><span class="math inline">𝒞 = {<em>I</em>, <em>P</em>}</span> 由图像
+<span class="math inline"><em>I</em></span> 及其文本提示 <span
+class="math inline"><em>P</em></span> 给出</p>
+<h6 id="静态世界生成">静态世界生成</h6>
+<p>过程1:逼真风格场景生成</p>
+<ul>
+<li><ol type="1">
+<li><ul>
+<li><ol start="5" type="1">
+<li></li>
+</ol></li>
+</ul></li>
+</ol></li>
+</ul>
+<p>过程2:以逼真风格场景生成为基础，生成风格化场景</p>
+<ul>
+<li><ol start="6" type="1">
+<li><ul>
+<li><ol start="7" type="1">
+<li></li>
+</ol></li>
+</ul></li>
+</ol></li>
+</ul>
+<p><img src="5.png" alt="image" />
+(1)定义了10个场景类别，5种室内场景和5种室外场景</p>
+<p>(2)从开源场景数据集和在线来源<code>unsplash</code>中获取图像</p>
+<p>数据集如下：</p>
+<figure>
+<img src="9.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<p>(3)因为上述数据集存在信息冗余，视角异常，拍摄角度过窄等问题，对图像应用过滤策略，以确保高质量和高多样性，产生了5000张<strong>逼真风格</strong>(Photorealistic)的图像<span
+class="math inline"><em>I</em></span>(真实或基于物理渲染)，策略如下：</p>
+<ul>
+<li><p>视觉质量：<code>CLIP-IQA</code>和<code>CLIP Aesthetic</code>过滤视觉质量</p></li>
+<li><p>视角问题：利用<code>Perspective Fields</code>建模图像局部视角属性,如yaw，pitch，FOV,剔除roll，pitch异常和FOV过窄的情况</p></li>
+<li><p>相似度：采用<code>CLIPSIM</code>移除极端相似图像</p></li>
+<li><p>亮度：计算图像亮度，过滤亮度低于阈值的图像</p></li>
+<li><p>最后进行人工筛选</p></li>
+</ul>
+<p>下图是图示筛选的过程：</p>
+<figure>
+<img src="10.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<p>(4)用VLM(GPT-4o)，为这些图像生成字幕<span
+class="math inline"><em>P</em></span>，并进行10分类，将每张图像放入一个类别中</p>
+<p>(5)保留每个类别中前100张最高质量的图像，从而得到1000张图像 <span
+class="math inline"><em>I</em><sup>′</sup></span>及其相应的提示<span
+class="math inline"><em>P</em><sup>′</sup></span></p>
+<figure>
+<img src="6.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<p>(6)为了保证<strong>风格的多样性</strong>，为每个<strong>逼真风格</strong>示例创建了一个<strong>Stylized</strong>副本。对于每个示例，从一组风格候选集<span
+class="math inline">{<em>s</em><sub><em>i</em></sub>}<sub><em>i</em> = 1</sub><sup>7</sup></span>中随机选择一种风格<span
+class="math inline"><em>s</em></span>，并将<span
+class="math inline"><em>s</em></span>添加到原提示<span
+class="math inline"><em>P</em><sup>′</sup></span>中来创建一个新的文本提示<span
+class="math inline"><em>P</em> = <em>s</em> + <em>P</em><sup>′</sup></span>。风格共有7种：Anime,
+Cyberpunk, Chinese ink painting, Ukiyo-E, Impressionism,
+Post-Impressionism, Minecraft.</p>
+<figure>
+<img src="7.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<p>(7)利用闭源文生图api来生成风格化图像 <span
+class="math inline"><em>I</em></span>。</p>
+<p>最终的十类场景如下图所示,每一个场景上面是逼真风格，下面左侧是风格化结果，下面右侧是可选风格：</p>
+<figure>
+<img src="8.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<h6 id="动态世界生成">动态世界生成</h6>
+<p>(1)定义了 5
+种<strong>运动类型</strong>，从<code>unsplash</code>手动为每种类型挑选了100张图像</p>
+<p>(2)遵循与静态世界生成中(4)(5)(6)过程相近的方式创建了文本提示和风格化副本，最终得到1000个示例</p>
+<p>(3)为每一张示例生成了一张<code>Mask Image</code>来指示运动应当在哪里发生</p>
+<p>展示如下：</p>
+<figure>
+<img src="12.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<h5 id="mathcaln-的策划"><span class="math inline">𝒩</span> 的策划</h5>
+<p><span
+class="math inline"><em>N</em></span>对于不同的世界可以有不同的长度:</p>
+<ul>
+<li>小世界(Small World), <span
+class="math inline">𝒩</span>只包含一个新场景</li>
+<li>大世界(Large World)，<span
+class="math inline">𝒩</span>包含三个新场景，共四个</li>
+</ul>
+<p>文章指示LLM生成与所有当前场景文本提示<span
+class="math inline"><em>P</em></span>不同的下一场景文本提示</p>
+<ul>
+<li><p>对于一个小世界: LLM 接受输入任务规范 <span
+class="math inline">𝒥</span>, 以及对于过去和当前场景描述的prompt集合
+<span class="math inline">𝒫</span> <span
+class="math display">𝒩 = <em>L</em><em>L</em><em>M</em>(𝒥, 𝒫)</span></p></li>
+<li><p>对于包含四个场景的大世界，重复上述过程三次，因此包含三个独立的下一场景提示</p></li>
+</ul>
+<p>具体而言，对于静态场景生成：</p>
+<p><span
+class="math inline">𝒥<sub><em>s</em><em>t</em><em>a</em><em>t</em><em>i</em><em>c</em></sub></span>:</p>
+<figure>
+<img src="13.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<p>生成的<span
+class="math inline">𝒩<sub><em>s</em><em>t</em><em>a</em><em>t</em><em>i</em><em>c</em></sub></span>为：</p>
+<figure>
+<img src="14.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<p><code>"Entities"</code>是metric部分在计算可控性(controllability)时需要进行检测的对象</p>
+<p>对于动态场景生成：</p>
+<p><span
+class="math inline">𝒥<sub><em>d</em><em>y</em><em>n</em><em>a</em><em>m</em><em>i</em><em>c</em></sub></span>:</p>
+<figure>
+<img src="15.jpg" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<p>生成的<span
+class="math inline">𝒩<sub><em>d</em><em>y</em><em>n</em><em>a</em><em>m</em><em>i</em><em>c</em></sub></span></p>
+<figure>
+<img src="16.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<p><code>"Objects"</code>是用于为运动对象提供<code>mask</code>,从而在metric部分中计算运动精度</p>
+<h5 id="mathcall-的策划"><span class="math inline">ℒ</span> 的策划</h5>
+<p><span class="math inline">ℒ = {𝒯, 𝒴}</span> 包括相机轨迹 <span
+class="math inline">𝒯 = (<em>C</em><sub>1</sub>, <em>C</em><sub>2</sub>, ⋅ ⋅ ⋅, <em>C</em><sub><em>N</em></sub>)</span>
+和相机运动的文本提示 <span class="math inline"><em>Y</em></span>。</p>
+<p>对于相机运动，根据电影行业的启发，文章准备了一个涵盖8种相机运动的集合</p>
+<figure>
+<img src="17.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<p>这种设计两个好处：</p>
+<ul>
+<li><p>涵盖了所有空间方向</p></li>
+<li><p>text2video模型大多在包含这种运动描述的电影切片上训练过，所以这种标注<span
+class="math inline">𝒴</span>有利于text2video进行训练</p></li>
+</ul>
+<p>8种运动的分类：</p>
+<ul>
+<li>场景内运动，e.g., push in</li>
+<li>场景间过渡, e.g., pull out</li>
+</ul>
+<p>特别地，对于静态场景生成，文章随机为下一场景生成任务分配一个布局<span
+class="math inline"><em>L</em></span>。当分配的布局仍然在场景内时，用<span
+class="math inline"><em>P</em></span>替换<span
+class="math inline"><em>N</em></span></p>
+<figure>
+<img src="18.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<h3 id="worldscore-metric">WorldScore Metric</h3>
+<p>WorldScore包括两个集合：</p>
+<ul>
+<li>WorldScore-Static，仅衡量静态世界生成能力,包括可控性(controllability)和质量(quality)</li>
+<li>WorldScore-Dynamic，除了静态世界外还衡量动态世界生成能力，包括可控性(controllability)，质量(quality)和动态性(dynamics)</li>
+</ul>
+<figure>
+<img src="19.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<h4 id="可控性controllability">可控性(controllability)</h4>
+<h5 id="相机可控性camera-controllability">相机可控性(Camera
+controllability)</h5>
+<p>为了评估模型生成内容对布局 <span
+class="math inline">ℒ = {𝒯, <em>y</em>}</span>
+的遵循程度，计算相机误差如下： <span
+class="math display">$$e_{camera}=\sqrt{e_{\theta}\cdot e_{t}}$$</span>
+<span
+class="math inline"><em>e</em><sub><em>θ</em></sub></span>：相对于真实轨迹
+<span class="math inline">𝒯</span> 的尺度不变旋转误差(scale-invarianet
+rotation error)</p>
+<p><span
+class="math inline"><em>e</em><sub><em>t</em></sub></span>：相对于真实轨迹
+<span class="math inline">𝒯</span> 的平移误差(translation error)</p>
+<p>使用<code>DROID-SLAM</code>来估计每一帧的相机位姿 <span
+class="math inline"><em>R</em></span> 和 <span
+class="math inline"><em>t</em></span> 同时计算出<span
+class="math inline"><em>s</em></span>,<span
+class="math inline"><em>R</em></span>代表相机旋转矩阵，<span
+class="math inline"><em>t</em></span>代表相机位置, <span
+class="math inline"><em>s</em></span>是尺度因子</p>
+<p><span class="math display">$$e_{\theta} =
+arccos(\frac{tr(R_{gt}R^\top) - 1}{2}) \times
+\frac{180}{\pi}$$</span></p>
+<p><span
+class="math display"><em>e</em><sub><em>t</em></sub> = ‖<em>t</em><sub><em>g</em><em>t</em></sub> − <em>s</em><em>t</em>‖<sub>2</sub></span></p>
+<p>生成视频 <span class="math inline"><em>V</em></span>
+所有帧的相机误差都被计算,最后指标取各帧<span
+class="math inline"><em>e</em><sub><em>c</em></sub><em>a</em><em>m</em><em>e</em><em>r</em><em>a</em></span>的平均数</p>
+<figure>
+<img src="26.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<h6 id="引入s的原因">引入<span
+class="math inline"><em>s</em></span>的原因</h6>
+<p>单目视觉无法判断物体的真实大小或距离，估计的 <span
+class="math inline"><em>t</em></span>
+是带物理单位的三维位置，<strong>依赖于真实世界的尺度</strong></p>
+<p>对于单目SLAM，只能估计出up-to-scale的平移向量</p>
+<p><span
+class="math display"><em>t</em><sup>′</sup> = <em>s</em> ⋅ <em>t</em></span></p>
+<p>因此引入<span
+class="math inline"><em>s</em><sup>*</sup></span>来最小化误差</p>
+<p><span class="math display">$$s^* = \arg\min_s \sum_{i=1}^N \left\|
+t_{gt}^{(i)} - s \cdot t^{(i)} \right\|_2^2$$</span></p>
+<h5 id="物体可控性object-controllability">物体可控性(Object
+controllability)</h5>
+<p>评估下一场景提示<span
+class="math inline">𝒩</span>中指定的物体是否出现在生成的下一场景</p>
+<p>从<span
+class="math inline">𝒩</span>中提取出一或二个单独的物体描述，利用open-set物体检测模型<code>Grounding dino</code>在场景中进行检测并且计算与物体描述的匹配成功率</p>
+<figure>
+<img src="27.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<h5 id="内容对齐content-alignment">内容对齐(Content alignment)</h5>
+<p>利用<code>CLIPScore</code>评估生成的场景与整个文本<span
+class="math inline"><em>N</em></span>对齐程度</p>
+<figure>
+<img src="28.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<h4 id="质量quality">质量(quality)</h4>
+<h5 id="d-一致性3d-consistency">3D 一致性(3D consistency)</h5>
+<p>应用范围：静态世界视频(static world videos)</p>
+<p>侧重点：(1)场景的<strong>几何形状</strong>在帧之间如何保持稳定
+(2)视觉纹理的轻微变化可以容忍</p>
+<p>使用<code>DROID-SLAM</code>来估计每帧的像素级深度，好处是使用<code>DBA(密集的Bundle Adjustment)</code><strong>稠密重建</strong>，利用好图像中每一个像素的信息,更好捕捉全场景一致性</p>
+<p>然后计算连续帧中一对共视像素之间的重投影误差</p>
+<p>意义：如果3d consistency良好，那么3d
+reconstruction之后的三维结构和相机位姿的自洽性良好，那么重投影误差应该小</p>
+<p>对比示例图如下：</p>
+<figure>
+<img src="20.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<h5 id="光度一致性photometric-consistency">光度一致性(Photometric
+consistency)</h5>
+<p>侧重点： <strong>外观(纹理)</strong> 的稳定性</p>
+<p>现有问题：(1)视频生成模型在保持纹理一致性方面存在困难
+(2)现有指标，如以<code>CLIP</code>和<code>DINO</code>为基础的，难以衡量细粒度变化</p>
+<p>为了检测光度伪影(photometric
+artifiacts)，评估了连续帧之间的光流并计算平均<strong>端点</strong>误差(Average
+End-Point Error AEPE)</p>
+<figure>
+<img src="21.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<p>具体地，给定两帧相邻帧 <span class="math inline"><em>A</em></span> 和
+<span class="math inline"><em>B</em></span>，</p>
+<p>先估计相邻帧之间的光流场 <span
+class="math inline"><em>F</em><sub><em>A</em> → <em>B</em></sub></span>
+和 <span
+class="math inline"><em>F</em><sub><em>B</em> → <em>A</em></sub></span></p>
+<p>先用从 <span class="math inline"><em>A</em></span> 到 <span
+class="math inline"><em>B</em></span> 的前向光流场 <span
+class="math inline"><em>F</em><sub><em>A</em> → <em>B</em></sub></span>
+将一组中心裁切(生成模型中心区域通常被遮挡/边缘效应更小)的点 <span
+class="math inline"><em>p</em><sub><em>A</em></sub></span> 跟踪到帧
+<span class="math inline"><em>B</em></span>：</p>
+<p><span
+class="math display"><em>p</em><sub><em>B</em></sub> = <em>P</em><sub><em>A</em></sub> + <em>F</em><sub><em>A</em> → <em>B</em></sub>(<em>p</em><sub><em>A</em></sub>)</span></p>
+<p>再用从 <span class="math inline"><em>B</em></span> 到 <span
+class="math inline"><em>A</em></span> 的后向光流场 <span
+class="math inline"><em>F</em><sub><em>B</em> → <em>A</em></sub></span>
+将这些点从 <span class="math inline"><em>B</em></span> 跟回 <span
+class="math inline"><em>A</em></span>：</p>
+<p><span
+class="math display"><em>P</em><sub><em>A</em></sub><sup>′</sup> = <em>P</em><sub><em>B</em></sub> + <em>F</em><sub><em>B</em> → <em>A</em></sub>(<em>P</em><sub><em>B</em></sub>)</span></p>
+<p>理想情况下，如果物体光度一致，被跟踪的点会回到原始位置，即 <span
+class="math inline"><em>P</em><sub><em>A</em></sub><sup>′</sup> ≈ <em>p</em><sub><em>A</em></sub></span>。用
+AEPE 来量化偏差： <span class="math display">$$
+e_{\text{photometric}} = \frac{1}{N}\sum_{i=1}^N \| p_{A,i} - p'_{A,i}
+\|_2^2,
+$$</span></p>
+<p><span class="math inline"><em>N</em></span>为采样点数量</p>
+<p>总体度量通过对所有生成视频的所有相邻帧对的 <span
+class="math inline"><em>e</em><sub>photometric</sub></span>
+求平均得到</p>
+<p>较高的该指标表明光度不一致更严重，会反映出例外观变化、纹理闪烁或物体消失等异常</p>
+<h5 id="风格一致性style-consistency">风格一致性(Style consistency)</h5>
+<p>计算单个下一场景生成任务的第一帧和最后一帧的<code>Gram矩阵</code>之间的差异来评估</p>
+<p>通过逐层的CNN对每一帧进行特征提取：</p>
+<p>在第 <span class="math inline"><em>l</em></span>
+层，记该层的特征响应为矩阵 <span
+class="math inline"><em>F</em><sup><em>l</em></sup> ∈ ℝ<sup><em>N</em><sub><em>l</em></sub> × <em>M</em><sub><em>l</em></sub></sup></span>：</p>
+<p><span
+class="math inline"><em>N</em><sub><em>l</em></sub></span>：该层的通道数（filter
+数）， <span
+class="math inline"><em>M</em><sub><em>l</em></sub></span>：每个通道的空间位置数（height
+<span class="math inline">×</span> width），即一张对应特征图</p>
+<p>Gram 矩阵 <span
+class="math inline"><em>G</em><sup><em>l</em></sup> ∈ ℝ<sup><em>N</em><sub><em>l</em></sub> × <em>N</em><sub><em>l</em></sub></sup></span>:</p>
+<p>衡量的是第 <span class="math inline"><em>i</em></span> 个特征图与第
+<span class="math inline"><em>j</em></span>
+个特征图在所有空间位置上同时激活的频率</p>
+<p>从视觉意义上讲，这个矩阵保留了某张图像“纹理/局部特征与色彩共现的信息，并丢弃了像素的全局几何排列，而正与审美角度的”风格”相符合</p>
+<p>使用<code>Frobenius</code>范数来衡量两个Gram矩阵之间的差异</p>
+<figure>
+<img src="29.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<h5
+id="主观人类感知质量subjective-quality">主观(人类感知)质量(Subjective
+quality)</h5>
+<figure>
+<img src="30.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<p>背景：现存许多训练好的图像质量评价指标模型，如<code>CLIP-Aesthetic</code>,<code>QAlign-Aesthetic</code>,<code>MUSIQ</code>,<code>CLIP-IQA</code>等等</p>
+<p>目标：在以上的指标中进行组合，选取出最为贴近<code>人类感知偏好</code>的组合</p>
+<p>方法：人工实验</p>
+<ul>
+<li>选择200个实验的人，给定一个视频对(A,
+B),问问题<code>which video has higher quality</code>,并强制要求二选一</li>
+<li>选 A 的比例为 <span class="math inline"><em>p</em></span>, 选 B
+的比例为 <span class="math inline">1 − <em>p</em></span></li>
+<li>用待实验的metric <span class="math inline"><em>m</em></span> 对(A,
+B)进行评判，若给A打分高<span
+class="math inline"><em>s</em><em>c</em><em>o</em><em>r</em><em>e</em><sub><em>m</em></sub>(<em>A</em>) &gt; <em>s</em><em>c</em><em>o</em><em>r</em><em>e</em><sub><em>m</em></sub>(<em>B</em>)</span>,那么m在(A,
+B)上的agreement score就是 <span
+class="math inline"><em>p</em></span>；若给B打分高<span
+class="math inline"><em>s</em><em>c</em><em>o</em><em>r</em><em>e</em><sub><em>m</em></sub>(<em>A</em>) &lt; <em>s</em><em>c</em><em>o</em><em>r</em><em>e</em><sub><em>m</em></sub>(<em>B</em>)</span>,那么m在(A,
+B)上的agreement score就是 <span
+class="math inline">1 − <em>p</em></span>; 若是<span
+class="math inline"><em>s</em><em>c</em><em>o</em><em>r</em><em>e</em><sub><em>m</em></sub>(<em>A</em>) = <em>s</em><em>c</em><em>o</em><em>r</em><em>e</em><sub><em>m</em></sub>(<em>B</em>)</span>，m在(A,
+B)上的agreement score就是<span class="math inline">0.5</span>, <span
+class="math inline"><em>m</em></span>的最终得分取在所有视频上的平均分</li>
+<li>问题没有问很细致，只问到<code>quality</code>的原因是：过于细致的问题，实验者很难做出果断的回答</li>
+</ul>
+<p>结论：<code>CLIP-IQA+ and CLIP Aesthetic</code>最高,<code>upper_bound</code>是该指标若每次都选比例更高一方所能达到的上限</p>
+<figure>
+<img src="22.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<h4 id="动态性dynamics">动态性(Dynamics)</h4>
+<h5 id="运动准确性motion-accuracy">运动准确性(Motion Accuracy)</h5>
+<p>评估：下一场景提示 <span class="math inline">𝒩</span>
+中指定的运动是否发生在指定区域</p>
+<p>方法：</p>
+<p><span
+class="math display"><em>s</em><sub>motion-acc</sub> = max (<em>F</em> ⊙ <em>M</em>) − max (<em>F</em> ⊙ <em>M̄</em>)</span>
+其中：</p>
+<p><span
+class="math inline"><em>F</em> ∈ ℝ<sup><em>H</em> × <em>W</em></sup></span>：相邻两帧之间的光流（optical
+flow）幅值，由<code>SEA-RAFT</code>估计得到 <span
+class="math inline"><em>M</em> ∈ {0, 1}<sup><em>H</em> × <em>W</em></sup></span>：前一帧的动态物体掩码，动态物体像素值为
+1，其它地方为 0 <span
+class="math inline"><em>M̄</em> = 1 − <em>M</em></span>：掩码的反集（静态为
+1，动态为 0）</p>
+<p>用<code>SAM2</code>去跟踪这些动态物体掩码 <span
+class="math inline"><em>M</em></span>，初始的第一帧掩码是数据集中已经提供的</p>
+<p>公式含义：取动态区域的最明显运动减去静态区域的最明显运动，该数值越大，说明<strong>运动集中在它该发生的区域</strong></p>
+<p>最终对视频中所有连续帧对计算 <span
+class="math inline"><em>s</em><sub>&lt;</sub>! − −<em>s</em><em>w</em><em>i</em><em>g</em>￼0 − −&gt;</span>，再对所有帧对、所有生成视频取平均</p>
+<figure>
+<img src="23.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<h5 id="运动幅度motion-magnitude">运动幅度(Motion Magnitude)</h5>
+<p>评估：世界生成模型生成大幅度运动的能力</p>
+<p>动机：生成细微运动缺乏趣味性</p>
+<p>方法：</p>
+<p><span
+class="math display"><em>s</em><sub><em>m</em><em>o</em><em>t</em><em>i</em><em>o</em><em>n</em> − <em>m</em><em>a</em><em>g</em></sub> = <em>m</em><em>e</em><em>d</em><em>i</em><em>a</em><em>n</em>(<em>F</em><sub><em>i</em><em>j</em></sub>)</span></p>
+<p><span
+class="math inline"><em>F</em> ∈ ℝ<sup><em>H</em> × <em>W</em></sup></span>：相邻两帧之间的光流（optical
+flow）幅值，由<code>SEA-RAFT</code>估计得到</p>
+<p>最终对视频中所有连续帧对计算 <span
+class="math inline"><em>s</em><sub>&lt;</sub>! − −<em>s</em><em>w</em><em>i</em><em>g</em>￼1 − −&gt;</span>，再对所有帧对、所有生成视频取平均</p>
+<figure>
+<img src="31.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<h5 id="运动平滑度motion-smoothness">运动平滑度(Motion Smoothness)</h5>
+<p>评估：生成视频<span
+class="math inline"><em>V</em></span>的时间平滑度</p>
+<p>动机：时间抖动(temporal
+jittering)是动态世界生成问题中的常见失效模式</p>
+<p>方法：</p>
+<ul>
+<li><p>给定一个生成视频，其帧序列为 <span
+class="math inline">{<em>f</em><sub>0</sub>, <em>f</em><sub>1</sub>, <em>f</em><sub>2</sub>, …}</span>，将奇数索引帧
+<span
+class="math inline">{<em>f</em><sub>1</sub>, <em>f</em><sub>3</sub>, …}</span>
+删除，得到一个帧率较低的视频；然后使用视频帧插值模型<code>Vfimamba</code>推断出这些被删除的帧,<strong>插值后的帧是平滑帧，作为插值前的帧的参考</strong></p></li>
+<li><p>计算重建帧与原始被删除帧之间的均方误差(MSE)、结构相似性(SSIM)和LPIPS</p></li>
+<li><p>计算并采用下面的归一化方法归一化每个指标后，取平均值，得到最终的指标</p></li>
+</ul>
+<figure>
+<img src="32.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<h5 id="归一化方法">归一化方法</h5>
+<p><span class="math display">$$s_{\text{norm}} =
+\begin{cases}
+\left\langle \frac{s - b_{\text{min}}}{b_{\text{max}} - b_{\text{min}}}
+\right\rangle,  \text{if higher is better} \\
+\left\langle 1 - \frac{s - b_{\text{min}}}{b_{\text{max}} -
+b_{\text{min}}} \right\rangle,  \text{if lower is better}
+\end{cases}
+$$</span></p>
+<p>其中：</p>
+<p><span class="math inline"><em>s</em></span>
+表示给定指标的<strong>原始值</strong> <span
+class="math inline"><em>b</em><sub>min</sub></span> 和 <span
+class="math inline"><em>b</em><sub>max</sub></span>
+表示该指标的<strong>经验界限</strong> <span
+class="math inline">⟨⋅⟩</span>
+表示<strong>截断函数</strong>,确保标准化后的分数 <span
+class="math inline"><em>s</em><sub>norm</sub></span> 落在 <span
+class="math inline">[0, 1]</span> 的范围内</p>
+<h3 id="个metric之间的统一">10个metric之间的统一</h3>
+<p>在计算出各项独立的指标后，应用下文的经验限度和上文的归一化方法确保最终分数落在0-1，然后将其乘以
+100
+接着，计算<strong>controllability</strong>和<strong>quality</strong>两个维度得分的算术平均值，得到<strong>WorldScore-Static</strong>
+此外，将三个动态维度的得分纳入，从而得到<strong>WorldScore-Dynamic</strong>
+对于不支持动态任务的 3D 场景生成模型，将每个动态指标的得分设为0</p>
+<h4 id="经验限度">经验限度</h4>
+<h5 id="相机可控性">相机可控性</h5>
+<p><strong>越小越好</strong></p>
+<p>下限：0 (无偏差)</p>
+<p>上限：在相机一直不动的情况下计算出来的偏差就是上限</p>
+<h5 id="物体可控性">物体可控性</h5>
+<p><strong>越大越好</strong></p>
+<p>由于该指标使用物体检测率，上限1，下限0</p>
+<h5
+id="d一致性风格一致性和光度一致性">3D一致性、风格一致性和光度一致性</h5>
+<p><strong>越小越好</strong></p>
+<p>下限：0 (完全一致)</p>
+<p>上限：完全随机图像对，使用<code>Vfimamba</code>插值生成视频，该视频的评分就是上限</p>
+<h5 id="运动平滑度">运动平滑度</h5>
+<p><strong>越小越好</strong></p>
+<p>下限：0 (完全平滑)</p>
+<p>上限：选取一些视频，删除奇数帧，用<code>双线性插值</code>重建，代表经验最差</p>
+<h5
+id="内容对齐主观质量运动准确度和运动幅度">内容对齐、主观质量、运动准确度和运动幅度</h5>
+<p><strong>越大越好</strong></p>
+<p>使用<code>z-score rescaling</code>，手动将性能分落在25-75之间</p>
+<h3 id="启发">启发</h3>
+<figure>
+<img src="25.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<ul>
+<li><p>3D 模型在静态世界生成方面表现出色</p></li>
+<li><p>视频模型缺乏相机可控性</p></li>
+<li><p>最佳开源视频模型与闭源视频模型一样好</p></li>
+<li><p>运动平滑度和运动幅度之间存在权衡</p></li>
+<li><p>更大的运动不一定意味着更准确的运动定位</p></li>
+<li><p>视频模型在长序列生成和户外场景中表现较弱</p></li>
+<li><p>T2V 模型比 I2V 模型更容易操纵</p></li>
+</ul>
+<figure>
+<img src="24.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>Author: </span><span class="post-copyright-info"><a href="https://ma-hongbo.github.io">Hongbo Ma</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>Link: </span><span class="post-copyright-info"><a href="https://ma-hongbo.github.io/2025/10/02/Worldscore-0/">https://ma-hongbo.github.io/2025/10/02/Worldscore-0/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>Copyright Notice: </span><span class="post-copyright-info">All articles on this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless otherwise stated.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/blogs/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/">计算机视觉</a><a class="post-meta__tags" href="/blogs/tags/%E4%B8%96%E7%95%8C%E6%A8%A1%E5%9E%8B/">世界模型</a></div><div class="post-share"><div class="social-share" data-image="/blogs/img/profile.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/blogs/2025/07/07/paper2poster/" title="Paper2poster 论文解读"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">Next</div><div class="info-item-2">Paper2poster 论文解读</div></div><div class="info-2"><div class="info-item-1">Paper2Poster: Towards Multimodal Poster Automation from Scientific Papers Overview   image  两个贡献： （1）提出基准测试和度量标准： 这是首个针对海报生成的基准测试，它通过以下四个方面来评估生成的海报：  视觉质量： 生成海报的语义与人类设计的海报的契合度 文本连贯性： 海报中语言的流畅性 整体评估： 通过“视觉语言模型（VLM）作为评判者”来评分的六项细致的美学和信息标准 PaperQuiz： 衡量海报传达论文核心内容的能力，方法是让 VLM 回答根据海报生成的问题  （2）PosterAgent： 一个新颖的、自上而下、融入视觉反馈的多智能体管道，专门用于海报生成。它包含三个主要组成部分：  解析器（Parser）： 将论文内容提炼成结构化的“资产库”。 规划器（Planner）： 将文本和视觉元素对齐到二叉树布局中，以保持阅读顺序和空间平衡。 绘图器-评论器循环（Painter–Commenter Loop）： 通过执行渲染代码并利用 VLM 的反馈来优化每个面板，以消除溢出并确保...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>Related Articles</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/blogs/2025/07/06/vggt/" title="VGGT 论文解读"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-07-06</div><div class="info-item-2">VGGT 论文解读</div></div><div class="info-2"><div class="info-item-1">VGGT Overview 前馈神经网络： 从一张或多张图片中预测3d场景的关键属性:  相机参数 深度图 点云 3d轨迹  优点： 不依赖传统优化，快，好，不需要先验，从图像序列中一次性输出3d场景信息。 Method Basic Definition VGGT的输入是N张同一场景不同角度的RGB图片序列{Ii}i = 1N,Ii ∈ ℝ3 × H × W VGGT transformer是一个映射 f ，将这个图片序列映射到了场景3d属性序列中： f({Ii}i = 1N) = {(gi, Di, Pi, Ti)}i = 1N, 对于某一张（一帧）图片而言： gi ∈ ℝ9 相机参数（内参 + 外参）：  gi = [q, t, f] q ∈ ℝ4 ：相机旋转角 t ∈ ℝ3 ：平移向量 f ∈ ℝ2 ：视场角 FOV (θx, θy)，假设中心在图像几何中心（内参）  Di ∈ ℝH × W 深度图：  设第 i 张图像为 Ii，其像素网格定义为： ℐ(Ii) = {1, …, H} × {1, …, W} 每个像素的位置用二维坐标 y = (h, w) ∈ ℐ(Ii) 表...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/blogs/img/profile.png" onerror="this.onerror=null;this.src='/blogs/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Hongbo Ma</div><div class="author-info-description"></div><div class="site-data"><a href="/blogs/archives/"><div class="headline">Articles</div><div class="length-num">3</div></a><a href="/blogs/tags/"><div class="headline">Tags</div><div class="length-num">3</div></a><a href="/blogs/categories/"><div class="headline">Categories</div><div class="length-num">1</div></a></div><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/Ma-Hongbo" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:mahongbothu@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a><a class="social-icon" href="https://scholar.google.com/citations?user=1NIc69QAAAAJ&amp;hl=en" target="_blank" title="Google Scholar"><i class="fas fa-graduation-cap" style="color: #006621;"></i></a><a class="social-icon" href="https://www.zhihu.com/people/22-13-70-62-20" target="_blank" title="zhihu"><i class="fab fa-zhihu" style="color: #0078d4;"></i></a><a class="social-icon" href="https://www.xiaohongshu.com/user/profile/64d44d3f000000000e025c3e" target="_blank" title="xiaohongshu"><i class="fas fa-tag" style="color: #ff2d51;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>Announcement</span></div><div class="announcement_content">Welcome to my blog and feel free to explore!</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Contents</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#worldscore-a-unified-evaluation-benchmark-for-world-generation"><span class="toc-number">1.</span> <span class="toc-text">WorldScore:
+A Unified Evaluation Benchmark for World Generation</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#overview"><span class="toc-number">1.1.</span> <span class="toc-text">Overview</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%91%E6%88%98"><span class="toc-number">1.1.1.</span> <span class="toc-text">挑战</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%8E%B0%E6%9C%89benchmark%E7%9A%84%E7%BC%BA%E9%99%B7"><span class="toc-number">1.1.1.1.</span> <span class="toc-text">现有benchmark的缺陷</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%A7%86%E9%A2%91%E7%94%9F%E6%88%90%E6%96%B9%E5%90%91"><span class="toc-number">1.1.1.1.1.</span> <span class="toc-text">视频生成方向</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#d4d%E5%9C%BA%E6%99%AF%E7%94%9F%E6%88%90%E6%96%B9%E5%90%91"><span class="toc-number">1.1.1.1.2.</span> <span class="toc-text">3d,4d场景生成方向</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#worldscore-benchmark"><span class="toc-number">1.1.2.</span> <span class="toc-text">WorldScore Benchmark</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%9F%E4%B8%80%E6%80%A7"><span class="toc-number">1.1.2.1.</span> <span class="toc-text">统一性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A1%A1%E9%87%8F%E6%A0%87%E5%87%86"><span class="toc-number">1.1.2.2.</span> <span class="toc-text">衡量标准</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BB%E8%A6%81%E8%B4%A1%E7%8C%AE"><span class="toc-number">1.1.3.</span> <span class="toc-text">主要贡献</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#worldscore-benchmark-1"><span class="toc-number">1.2.</span> <span class="toc-text">WorldScore Benchmark</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B4%E4%BD%93%E6%A6%82%E8%BF%B0"><span class="toc-number">1.2.1.</span> <span class="toc-text">整体概述</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%96%E7%95%8C%E8%A7%84%E8%8C%83"><span class="toc-number">1.2.1.1.</span> <span class="toc-text">世界规范</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%96%E7%95%8C%E8%A7%84%E8%8C%83%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="toc-number">1.2.1.1.1.</span> <span class="toc-text">世界规范的定义</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%A8%A1%E5%9E%8B%E7%89%B9%E5%AE%9A%E7%9A%84%E9%A2%84%E5%A4%84%E7%90%86"><span class="toc-number">1.2.1.1.2.</span> <span class="toc-text">模型特定的预处理</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E5%AF%B9%E5%8F%82%E8%80%83%E5%9B%BE%E5%83%8Fi"><span class="toc-number">1.2.1.1.2.1.</span> <span class="toc-text">对参考图像I</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E5%AF%B9%E5%B8%83%E5%B1%80l"><span class="toc-number">1.2.1.1.2.2.</span> <span class="toc-text">对布局L</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E5%AF%B9%E4%BA%8E%E4%B8%8B%E4%B8%80%E5%9C%BA%E6%99%AF%E7%9A%84%E6%96%87%E6%9C%AC%E6%8F%90%E7%A4%BAn"><span class="toc-number">1.2.1.1.2.3.</span> <span class="toc-text">对于下一场景的文本提示N：</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%A4%E7%A7%8D%E4%BB%BB%E5%8A%A1%E9%9D%99%E6%80%81%E5%92%8C%E5%8A%A8%E6%80%81%E4%B8%96%E7%95%8C"><span class="toc-number">1.2.1.1.3.</span> <span class="toc-text">两种任务———静态和动态世界</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E9%9B%86%E7%AD%96%E5%88%92"><span class="toc-number">1.2.1.2.</span> <span class="toc-text">数据集策划</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#mathcalc-%E7%9A%84%E7%AD%96%E5%88%92"><span class="toc-number">1.2.1.2.1.</span> <span class="toc-text">𝒞 的策划</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E9%9D%99%E6%80%81%E4%B8%96%E7%95%8C%E7%94%9F%E6%88%90"><span class="toc-number">1.2.1.2.1.1.</span> <span class="toc-text">静态世界生成</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E5%8A%A8%E6%80%81%E4%B8%96%E7%95%8C%E7%94%9F%E6%88%90"><span class="toc-number">1.2.1.2.1.2.</span> <span class="toc-text">动态世界生成</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#mathcaln-%E7%9A%84%E7%AD%96%E5%88%92"><span class="toc-number">1.2.1.2.2.</span> <span class="toc-text">𝒩 的策划</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#mathcall-%E7%9A%84%E7%AD%96%E5%88%92"><span class="toc-number">1.2.1.2.3.</span> <span class="toc-text">ℒ 的策划</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#worldscore-metric"><span class="toc-number">1.2.2.</span> <span class="toc-text">WorldScore Metric</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%AF%E6%8E%A7%E6%80%A7controllability"><span class="toc-number">1.2.2.1.</span> <span class="toc-text">可控性(controllability)</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%9B%B8%E6%9C%BA%E5%8F%AF%E6%8E%A7%E6%80%A7camera-controllability"><span class="toc-number">1.2.2.1.1.</span> <span class="toc-text">相机可控性(Camera
+controllability)</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E5%BC%95%E5%85%A5s%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="toc-number">1.2.2.1.1.1.</span> <span class="toc-text">引入s的原因</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%89%A9%E4%BD%93%E5%8F%AF%E6%8E%A7%E6%80%A7object-controllability"><span class="toc-number">1.2.2.1.2.</span> <span class="toc-text">物体可控性(Object
+controllability)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%86%85%E5%AE%B9%E5%AF%B9%E9%BD%90content-alignment"><span class="toc-number">1.2.2.1.3.</span> <span class="toc-text">内容对齐(Content alignment)</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B4%A8%E9%87%8Fquality"><span class="toc-number">1.2.2.2.</span> <span class="toc-text">质量(quality)</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#d-%E4%B8%80%E8%87%B4%E6%80%A73d-consistency"><span class="toc-number">1.2.2.2.1.</span> <span class="toc-text">3D 一致性(3D consistency)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%85%89%E5%BA%A6%E4%B8%80%E8%87%B4%E6%80%A7photometric-consistency"><span class="toc-number">1.2.2.2.2.</span> <span class="toc-text">光度一致性(Photometric
+consistency)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%A3%8E%E6%A0%BC%E4%B8%80%E8%87%B4%E6%80%A7style-consistency"><span class="toc-number">1.2.2.2.3.</span> <span class="toc-text">风格一致性(Style consistency)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%BB%E8%A7%82%E4%BA%BA%E7%B1%BB%E6%84%9F%E7%9F%A5%E8%B4%A8%E9%87%8Fsubjective-quality"><span class="toc-number">1.2.2.2.4.</span> <span class="toc-text">主观(人类感知)质量(Subjective
+quality)</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8A%A8%E6%80%81%E6%80%A7dynamics"><span class="toc-number">1.2.2.3.</span> <span class="toc-text">动态性(Dynamics)</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%BF%90%E5%8A%A8%E5%87%86%E7%A1%AE%E6%80%A7motion-accuracy"><span class="toc-number">1.2.2.3.1.</span> <span class="toc-text">运动准确性(Motion Accuracy)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%BF%90%E5%8A%A8%E5%B9%85%E5%BA%A6motion-magnitude"><span class="toc-number">1.2.2.3.2.</span> <span class="toc-text">运动幅度(Motion Magnitude)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%BF%90%E5%8A%A8%E5%B9%B3%E6%BB%91%E5%BA%A6motion-smoothness"><span class="toc-number">1.2.2.3.3.</span> <span class="toc-text">运动平滑度(Motion Smoothness)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%BD%92%E4%B8%80%E5%8C%96%E6%96%B9%E6%B3%95"><span class="toc-number">1.2.2.3.4.</span> <span class="toc-text">归一化方法</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%AAmetric%E4%B9%8B%E9%97%B4%E7%9A%84%E7%BB%9F%E4%B8%80"><span class="toc-number">1.2.3.</span> <span class="toc-text">10个metric之间的统一</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%8F%E9%AA%8C%E9%99%90%E5%BA%A6"><span class="toc-number">1.2.3.1.</span> <span class="toc-text">经验限度</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%9B%B8%E6%9C%BA%E5%8F%AF%E6%8E%A7%E6%80%A7"><span class="toc-number">1.2.3.1.1.</span> <span class="toc-text">相机可控性</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%89%A9%E4%BD%93%E5%8F%AF%E6%8E%A7%E6%80%A7"><span class="toc-number">1.2.3.1.2.</span> <span class="toc-text">物体可控性</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#d%E4%B8%80%E8%87%B4%E6%80%A7%E9%A3%8E%E6%A0%BC%E4%B8%80%E8%87%B4%E6%80%A7%E5%92%8C%E5%85%89%E5%BA%A6%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-number">1.2.3.1.3.</span> <span class="toc-text">3D一致性、风格一致性和光度一致性</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%BF%90%E5%8A%A8%E5%B9%B3%E6%BB%91%E5%BA%A6"><span class="toc-number">1.2.3.1.4.</span> <span class="toc-text">运动平滑度</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%86%85%E5%AE%B9%E5%AF%B9%E9%BD%90%E4%B8%BB%E8%A7%82%E8%B4%A8%E9%87%8F%E8%BF%90%E5%8A%A8%E5%87%86%E7%A1%AE%E5%BA%A6%E5%92%8C%E8%BF%90%E5%8A%A8%E5%B9%85%E5%BA%A6"><span class="toc-number">1.2.3.1.5.</span> <span class="toc-text">内容对齐、主观质量、运动准确度和运动幅度</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%AF%E5%8F%91"><span class="toc-number">1.2.4.</span> <span class="toc-text">启发</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Posts</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/blogs/2025/10/02/Worldscore-0/" title="WordScore 论文解读">WordScore 论文解读</a><time datetime="2025-10-02T07:00:00.000Z" title="Created 2025-10-02 15:00:00">2025-10-02</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/blogs/2025/07/07/paper2poster/" title="Paper2poster 论文解读">Paper2poster 论文解读</a><time datetime="2025-07-07T08:23:58.000Z" title="Created 2025-07-07 16:23:58">2025-07-07</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/blogs/2025/07/06/vggt/" title="VGGT 论文解读">VGGT 论文解读</a><time datetime="2025-07-06T04:17:53.000Z" title="Created 2025-07-06 12:17:53">2025-07-06</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 By Hongbo Ma</span><span class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.0</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.1</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Reading Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Toggle Between Light and Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle Between Single-column and Double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="Settings"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back to Top"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/blogs/js/utils.js?v=5.5.1"></script><script src="/blogs/js/main.js?v=5.5.1"></script><div class="js-pjax"><script>(() => {
+  const loadMathjax = () => {
+    if (!window.MathJax) {
+      window.MathJax = {
+        loader: {
+          load: [
+            // Four font extension packages (optional)
+            //- '[tex]/bbm',
+            //- '[tex]/bboldx',
+            //- '[tex]/dsfont',
+            '[tex]/mhchem'
+          ],
+          paths: {
+            'mathjax-newcm': '[mathjax]/../@mathjax/mathjax-newcm-font',
+
+            //- // Four font extension packages (optional)
+            //- 'mathjax-bbm-extension': '[mathjax]/../@mathjax/mathjax-bbm-font-extension',
+            //- 'mathjax-bboldx-extension': '[mathjax]/../@mathjax/mathjax-bboldx-font-extension',
+            //- 'mathjax-dsfont-extension': '[mathjax]/../@mathjax/mathjax-dsfont-font-extension',
+            'mathjax-mhchem-extension': '[mathjax]/../@mathjax/mathjax-mhchem-font-extension'
+          }
+        },
+        output: {
+          font: 'mathjax-newcm',
+        },
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+          packages: {
+            '[+]': [
+              'mhchem'
+            ]
+          }
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          enableMenu: true,
+          menuOptions: {
+            settings: {
+              enrich: false  // Turn off Braille and voice narration text automatic generation
+            }
+          },
+          renderActions: {
+            findScript: [10, doc => {
+              for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                const display = !!node.type.match(/; *mode=display/)
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+                const text = document.createTextNode('')
+                node.parentNode.replaceChild(text, node)
+                math.start = {node: text, delim: '', n: 0}
+                math.end = {node: text, delim: '', n: 0}
+                doc.math.push(math)
+              }
+            }, '']
+          }
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = '/blogs/true'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.startup.document.state(0)
+      MathJax.texReset()
+      MathJax.typesetPromise()
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

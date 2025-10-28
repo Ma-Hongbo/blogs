@@ -1,0 +1,448 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Paper2poster 论文解读 | Hongbo Ma's Blog</title><meta name="author" content="Hongbo Ma"><meta name="copyright" content="Hongbo Ma"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Paper2Poster: Towards Multimodal Poster Automation from Scientific Papers Overview   image  两个贡献： （1）提出基准测试和度量标准： 这是首个针对海报生成的基准测试，它通过以下四个方面来评估生成的海报：  视觉质量： 生成海报的语义与人类设计的海报的契合度 文本连贯性： 海报中语言的流畅性 整体评估： 通">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Paper2poster 论文解读">
+<meta property="og:url" content="https://ma-hongbo.github.io/2025/07/07/paper2poster/index.html">
+<meta property="og:site_name" content="Hongbo Ma&#39;s Blog">
+<meta property="og:description" content="Paper2Poster: Towards Multimodal Poster Automation from Scientific Papers Overview   image  两个贡献： （1）提出基准测试和度量标准： 这是首个针对海报生成的基准测试，它通过以下四个方面来评估生成的海报：  视觉质量： 生成海报的语义与人类设计的海报的契合度 文本连贯性： 海报中语言的流畅性 整体评估： 通">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ma-hongbo.github.io/img/profile.png">
+<meta property="article:published_time" content="2025-07-07T08:23:58.000Z">
+<meta property="article:modified_time" content="2025-10-28T13:17:45.750Z">
+<meta property="article:author" content="Hongbo Ma">
+<meta property="article:tag" content="Agent">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ma-hongbo.github.io/img/profile.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Paper2poster 论文解读",
+  "url": "https://ma-hongbo.github.io/2025/07/07/paper2poster/",
+  "image": "https://ma-hongbo.github.io/img/profile.png",
+  "datePublished": "2025-07-07T08:23:58.000Z",
+  "dateModified": "2025-10-28T13:17:45.750Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Hongbo Ma",
+      "url": "https://ma-hongbo.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/blogs/img/favicon.png"><link rel="canonical" href="https://ma-hongbo.github.io/2025/07/07/paper2poster/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/blogs/css/index.css?v=5.5.1"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/blogs/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: 'Copy Successful',
+    error: 'Copy Failed',
+    noSupport: 'Browser Not Supported'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: 'Just now',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.12.0/dist/infinitegrid.min.js',
+    buttonText: 'Load More'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Paper2poster 论文解读',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.0"></head><body><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/blogs/"><span class="site-name">Hongbo Ma's Blog</span></a><a class="nav-page-title" href="/blogs/"><span class="site-name">Paper2poster 论文解读</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  Back to Home</span></span></a></span><div id="menus"></div></nav><div id="post-info"><h1 class="post-title">Paper2poster 论文解读</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2025-07-07T08:23:58.000Z" title="Created 2025-07-07 16:23:58">2025-07-07</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2025-10-28T13:17:45.750Z" title="Updated 2025-10-28 21:17:45">2025-10-28</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/blogs/categories/%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/">论文解读</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post Views:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1
+id="paper2poster-towards-multimodal-poster-automation-from-scientific-papers">Paper2Poster:
+Towards Multimodal Poster Automation from Scientific Papers</h1>
+<h2 id="overview">Overview</h2>
+<figure>
+<img src="1.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<p>两个贡献：</p>
+<p>（1）提出基准测试和度量标准：
+这是首个针对海报生成的基准测试，它通过以下四个方面来评估生成的海报：</p>
+<ul>
+<li><p>视觉质量： 生成海报的语义与人类设计的海报的契合度</p></li>
+<li><p>文本连贯性： 海报中语言的流畅性</p></li>
+<li><p>整体评估：
+通过“视觉语言模型（VLM）作为评判者”来评分的六项细致的美学和信息标准</p></li>
+<li><p><strong>PaperQuiz</strong>：
+衡量海报传达论文核心内容的能力，方法是让 VLM
+回答根据海报生成的问题</p></li>
+</ul>
+<p>（2）PosterAgent：
+一个新颖的、自上而下、融入视觉反馈的多智能体管道，专门用于海报生成。它包含三个主要组成部分：</p>
+<ul>
+<li><p>解析器（Parser）： 将论文内容提炼成结构化的“资产库”。</p></li>
+<li><p>规划器（Planner）：
+将文本和视觉元素对齐到二叉树布局中，以保持阅读顺序和空间平衡。</p></li>
+<li><p>绘图器-评论器循环（Painter–Commenter Loop）：
+通过执行渲染代码并利用 VLM
+的反馈来优化每个面板，以消除溢出并确保对齐</p></li>
+</ul>
+<h2 id="paper2poster-benchmark">Paper2Poster Benchmark</h2>
+<h3 id="data-curation">Data curation</h3>
+<p>data source （POSTERSUM dataset） -&gt; data sampling （length
+control + latest version）-&gt; final dataset</p>
+<h3 id="evaluation-metrics">Evaluation Metrics</h3>
+<h4 id="视觉质量指标-visual-quality-metrics">视觉质量指标 (Visual
+Quality Metrics)</h4>
+<h5 id="视觉相似度-visual-similarity">视觉相似度 (Visual
+Similarity)</h5>
+<p>衡量生成的宣传海报 ( <span class="math inline"><em>P̂</em></span> )
+与真实（由作者设计）宣传海报 ( <span
+class="math inline"><em>P</em><sup>*</sup></span> )
+之间的整体视觉相似性</p>
+<p>首先，使用 CLIP 图像编码器 ( <span
+class="math inline">CLIP<sub>image</sub></span> )
+将生成海报和真实海报都转化为图像嵌入（即它们的数值表示）：</p>
+<p><span
+class="math display"><em>z</em><sub><em>I</em></sub>(<em>X</em>) = CLIP<sub>image</sub>(<em>X</em>)</span></p>
+<p>然后，计算这两个图像嵌入之间的余弦相似度：</p>
+<p><span
+class="math display"><em>s</em><sub><em>V</em><em>S</em></sub> = <em>c</em><em>o</em><em>s</em>(<em>z</em><sub><em>I</em></sub>(<em>P̂</em>), <em>z</em><sub><em>I</em></sub>(<em>P</em><sup>*</sup>))</span></p>
+<p>与传统的基于分布的度量（例如
+FID）相比，这种方法在实例层面操作，能够直接衡量单个海报图像之间的语义一致性和整体内容相似性。</p>
+<h5 id="图表相关性-figure-relevance">图表相关性 (Figure Relevance)</h5>
+<p>此指标评估生成海报中的每个图表是否在上下文上是恰当的，检查图表与其在原始论文中对应的文本内容之间的语义关联度。</p>
+<p>对于从生成海报 <span class="math inline"><em>P̂</em></span> 中提取的
+<span class="math inline"><em>N</em></span> 个图表裁剪 <span
+class="math inline">{<em>f</em><sub><em>i</em></sub>}</span>
+，以及在原始论文中它们对应的文本段落 <span
+class="math inline">{<em>t</em><sub><em>i</em></sub>}</span>
+，会分别计算它们的图像嵌入和文本嵌入：</p>
+<p><span
+class="math display"><em>z</em><sub><em>I</em></sub>(<em>f</em><sub><em>i</em></sub>) = CLIP<sub>image</sub>(<em>f</em><sub><em>i</em></sub>)  (图表
+<em>f</em><sub><em>i</em></sub> 的图像嵌入)</span></p>
+<p><span
+class="math display"><em>z</em><sub><em>T</em></sub>(<em>t</em><sub><em>i</em></sub>) = CLIP<sub>text</sub>(<em>t</em><sub><em>i</em></sub>)  (对应文本
+<em>t</em><sub><em>i</em></sub> 的文本嵌入)</span></p>
+<p>然后计算每个图表图像嵌入与其对应文本嵌入之间的余弦相似度
+如果海报中包含图表 ( <span class="math inline"><em>N</em> &gt; 0</span>
+)，则 <span class="math inline"><em>s</em><sub>FR</sub></span>
+定义为所有这些图表-文本对余弦相似度的平均值：</p>
+<p><span class="math display">$$
+s_{FR} = \frac{1}{N} \sum_{i=1}^{N} [cos(z_I(f_i), z_T(t_i))]
+$$</span></p>
+<p>如果海报中没有包含任何图表 ( <span
+class="math inline"><em>N</em> = 0</span> )，则图表相关性 <span
+class="math inline"><em>s</em><sub>FR</sub></span> 直接设为 <span
+class="math inline">0</span></p>
+<h4 id="textual-coherence-文本连贯性">Textual Coherence
+(文本连贯性)</h4>
+<p>这个指标关注的是海报中所有文本（包括标题、正文、图表描述等）的质量。它旨在确保海报上的文字清晰、流畅、自然，符合语法和语义规则，从而提高读者的可读性和理解力</p>
+<p>计算方法：</p>
+<p>使用标准化的“Perplexity (PPL)”（困惑度）来量化文本连贯性</p>
+<p>将整个海报的文本输入到预训练的语言模型<code>Llama-2-7b-hf</code>中，语言模型会为每个词元
+<span class="math inline"><em>w</em><sub><em>i</em></sub></span>
+计算一个条件概率 <span
+class="math inline"><em>p</em>(<em>w</em><sub><em>i</em></sub>|<em>w</em><sub> &lt; <em>i</em></sub>)</span>
+，这个概率表示在已知前面所有词元 <span
+class="math inline"><em>w</em><sub>1</sub>, <em>w</em><sub>2</sub>, ..., <em>w</em><sub><em>i</em> − 1</sub></span>
+的情况下，当前词元 <span
+class="math inline"><em>w</em><sub><em>i</em></sub></span>
+出现的可能性有多大。</p>
+<p>困惑度定义为：</p>
+<p><span class="math display">$$
+PPL = \exp\left(-\frac{1}{n}\sum_{i=1}^{n} \log p(w_i |
+w_{&lt;i})\right)
+$$</span></p>
+<h4 id="vlm进行整体评估">VLM进行整体评估</h4>
+<p>输出分数： 对于每一张海报图像，VLM 会在 6
+个具体的评估标准上打分，分值范围是 1 到 5 分</p>
+<h5 id="两大类">两大类：</h5>
+<h6 id="审美分数-aesthetic-score">审美分数 (Aesthetic Score)：</h6>
+<ul>
+<li>元素质量 (Element Quality)</li>
+<li>布局平衡 (Layout Balance)</li>
+<li>吸引力 (Engagement)</li>
+</ul>
+<h6 id="信息分数-information-score">信息分数 (Information Score)：</h6>
+<ul>
+<li>清晰度 (Clarity)</li>
+<li>内容完整性 (Content Completeness)</li>
+<li>逻辑流程 (Logical Flow)</li>
+</ul>
+<p>重点的<code>prompt</code>可以参照<code>Paper2Poster/utils/prompt_templates</code>下：</p>
+<p><code>aesthetic_element_judge.yaml</code>、<code>aesthetic_engagement_judge.yaml</code>、
+<code>aesthetic_layout_judge.yaml</code>、
+<code>imformation_content_judge.yaml</code>、
+<code>imformation_logic_judge.yaml</code>、
+<code>aesthetic_low_level_judge.yaml</code></p>
+<p><span class="math display">$$
+Aesthetic Score = \frac{Element Quality + Layout Balance +
+Engagement}{3}
+$$</span></p>
+<p><span class="math display">$$
+Information Score = \frac{Clarity + Content Completeness + Logical
+Flow}{3}
+$$</span></p>
+<h3 id="paper-quiz">Paper Quiz</h3>
+<h4 id="quiz问题的生成">1. Quiz问题的生成</h4>
+<figure>
+<img src="2.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<p>输入每一篇论文的 PDF 文件，gpt-o3为每篇论文生成100道多项选择题： - 50
+道逐字问题 (Verbatim Questions)：
+这些问题可以直接从论文文本中找到答案</p>
+<ul>
+<li>50 道解释性问题 (Interpretive
+Questions)：这些问题需要更高层次的理解能力才能回答</li>
+</ul>
+<h4 id="quiz问题的回答">2. Quiz问题的回答</h4>
+<figure>
+<img src="3.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<p>将海报图像展示给六个VLM，模拟了从“休闲读者”到“专家读者”的不同理解水平，这些
+VLM 只能基于海报来回答 quiz 问题</p>
+<h4 id="评估海报效果">3. 评估海报效果</h4>
+<p>通过比较不同海报版本在这些 quiz
+上的得分，可以确定哪张海报最能有效地传达原始论文的内容。</p>
+<h4 id="计算公式">4. 计算公式</h4>
+<p>海报作为一种视觉媒介，其文本长度通常远少于论文。如果一个模型只是简单地将大量论文文本复制到海报上，它可能会在
+quiz 上获得高分，但这并不符合海报简洁明了的特点。</p>
+<p>论文引入了一个基于长度的惩罚机制，对原始 Quiz 分数 <span
+class="math inline"><em>s</em><sub><em>r</em></sub> ∈ [0, 100]</span>
+进行调整，得到一个惩罚分数 <span
+class="math inline"><em>s</em><sub><em>a</em></sub> ∈ [0, 200]</span>
+：</p>
+<p><span class="math display">$$
+s_a = s_r \left(1 + \frac{1}{\max(1, L/W)}\right)
+$$</span></p>
+<p>其中：</p>
+<p><span class="math inline"><em>s</em><sub><em>r</em></sub></span> :
+原始 Quiz 分数 <span class="math inline"><em>L</em></span> :
+生成海报的总文本长度 <span class="math inline"><em>W</em></span> :
+人工设计海报的文本长度中位数。这个值作为参考基准，代表了“合理”的海报文本长度</p>
+<h2 id="paperagent">PaperAgent</h2>
+<figure>
+<img src="4.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<h3 id="parser对于poster进行粗粒度压缩">1.
+Parser：对于Poster进行粗粒度压缩</h3>
+<figure>
+<img src="5.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<p>先利用工具将pdf文件转换为markdown，再利用LLM生成类似于JSON文件的大纲</p>
+<h4 id="text-assets">Text assets</h4>
+<p>对于文本，按照段落进行分割，每个键是一个章节标题，每个值是对应段落的摘要</p>
+<h4 id="visual-assets">Visual assets</h4>
+<p>对于视觉内容，每一个键是图表标题或表格标题，每一个值是提取的图像文件</p>
+<h3 id="planner构建海报">2. Planner：构建海报</h3>
+<figure>
+<img src="6.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<h4 id="asset-matching">Asset matching</h4>
+<p>将上文提到的<code>Text assets</code>与<code>Visual assets</code>进行一个匹配，使用LLM对这里面相关的内容进行语义对齐，生成一组(章节，图片)对</p>
+<h4 id="layout-generation">Layout generation</h4>
+<p>在一个给定的白板上确定布局，需要考虑内容长度，保留阅读顺序和内容宽高比，使用一种二叉树布局策略，将这种约束为每一个章节确定一个明确的面板</p>
+<h4 id="panel-iteration">Panel iteration</h4>
+<p>使用下面的<code>Painter–Commenter</code>循环，一次次迭代绘制面板</p>
+<h3 id="paintercommenter">3. Painter–Commenter</h3>
+<figure>
+<img src="7.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<h4 id="绘图器painter">绘图器（Painter）</h4>
+<p>使用LLM接受章节摘要并生成要点，即海报上呈现出来的主要文本内容</p>
+<p>利用<code>python-pptx</code>库生成代码并渲染成图像</p>
+<h4 id="评论器commenter">评论器（Commenter）</h4>
+<p>绘图器渲染出面板图像之后，使用一个VLM作为评论器评估质量，提出有针对性的视觉反馈，进行一个迭代，直到评论器发出成功信号或者到达最大迭代次数时才停止</p>
+<p>为防止VLM的幻觉问题， -
+使用了<code>zoom-in</code>策略，使评论器重点关注面板的特定区域，而不是进行整体评估，从而提高判断的准确性
+-
+使用上下文参考提示，提供给评论器两个示例，一个展示了严重文本溢出，另一个展示了理想布局，帮助评论器更准确识别</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>Author: </span><span class="post-copyright-info"><a href="https://ma-hongbo.github.io">Hongbo Ma</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>Link: </span><span class="post-copyright-info"><a href="https://ma-hongbo.github.io/2025/07/07/paper2poster/">https://ma-hongbo.github.io/2025/07/07/paper2poster/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>Copyright Notice: </span><span class="post-copyright-info">All articles on this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless otherwise stated.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/blogs/tags/Agent/">Agent</a></div><div class="post-share"><div class="social-share" data-image="/blogs/img/profile.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/blogs/2025/10/02/Worldscore-0/" title="WordScore 论文解读"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">Previous</div><div class="info-item-2">WordScore 论文解读</div></div><div class="info-2"><div class="info-item-1">WorldScore: A Unified Evaluation Benchmark for World Generation Overview   image  (1)统一性：将世界生成任务归纳拆解成了相机位姿变化下的下一场景生成任务，由此将3d生成，4d生成，视频生成等等世界生成方法统一化了 (2)测试维度：  可控性(controllability) 质量(quality) 动态性(dynamics)  (3)大规模，多样的测试示例：3,000 个高质量的测试示例；涵盖了各种世界，包括静态和动态、室内和室外、照片写实和风格化景 挑战 视频生成、3D 场景生成和 4D 场景生成初是为特定任务设计，虽然具备作为“世界生成系统”的潜力，但是在世界生成概念扩展的今天，难以适应既能够无缝集成多个不同场景(综合性)，又能够具有详细空间布局控制(控制性)的任务需求。 解决这个问题，首先需要的就是一个benchmark！ 现有benchmark的缺陷 视频生成方向 评估仅限于单个场景，无法衡量模型在生成多场景、具有复杂空间关系的“世界”时的能力 3d,4d场景生成方向 评估基准缺少关键组件...</div></div></div></a><a class="pagination-related" href="/blogs/2025/07/06/vggt/" title="VGGT 论文解读"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">Next</div><div class="info-item-2">VGGT 论文解读</div></div><div class="info-2"><div class="info-item-1">VGGT Overview 前馈神经网络： 从一张或多张图片中预测3d场景的关键属性:  相机参数 深度图 点云 3d轨迹  优点： 不依赖传统优化，快，好，不需要先验，从图像序列中一次性输出3d场景信息。 Method Basic Definition VGGT的输入是N张同一场景不同角度的RGB图片序列{Ii}i = 1N,Ii ∈ ℝ3 × H × W VGGT transformer是一个映射 f ，将这个图片序列映射到了场景3d属性序列中： f({Ii}i = 1N) = {(gi, Di, Pi, Ti)}i = 1N, 对于某一张（一帧）图片而言： gi ∈ ℝ9 相机参数（内参 + 外参）：  gi = [q, t, f] q ∈ ℝ4 ：相机旋转角 t ∈ ℝ3 ：平移向量 f ∈ ℝ2 ：视场角 FOV (θx, θy)，假设中心在图像几何中心（内参）  Di ∈ ℝH × W 深度图：  设第 i 张图像为 Ii，其像素网格定义为： ℐ(Ii) = {1, …, H} × {1, …, W} 每个像素的位置用二维坐标 y = (h, w) ∈ ℐ(Ii) 表...</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/blogs/img/profile.png" onerror="this.onerror=null;this.src='/blogs/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Hongbo Ma</div><div class="author-info-description"></div><div class="site-data"><a href="/blogs/archives/"><div class="headline">Articles</div><div class="length-num">3</div></a><a href="/blogs/tags/"><div class="headline">Tags</div><div class="length-num">3</div></a><a href="/blogs/categories/"><div class="headline">Categories</div><div class="length-num">1</div></a></div><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/Ma-Hongbo" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:mahongbothu@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a><a class="social-icon" href="https://scholar.google.com/citations?user=1NIc69QAAAAJ&amp;hl=en" target="_blank" title="Google Scholar"><i class="fas fa-graduation-cap" style="color: #006621;"></i></a><a class="social-icon" href="https://www.zhihu.com/people/22-13-70-62-20" target="_blank" title="zhihu"><i class="fab fa-zhihu" style="color: #0078d4;"></i></a><a class="social-icon" href="https://www.xiaohongshu.com/user/profile/64d44d3f000000000e025c3e" target="_blank" title="xiaohongshu"><i class="fas fa-tag" style="color: #ff2d51;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>Announcement</span></div><div class="announcement_content">Welcome to my blog and feel free to explore!</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Contents</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#paper2poster-towards-multimodal-poster-automation-from-scientific-papers"><span class="toc-number">1.</span> <span class="toc-text">Paper2Poster:
+Towards Multimodal Poster Automation from Scientific Papers</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#overview"><span class="toc-number">1.1.</span> <span class="toc-text">Overview</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#paper2poster-benchmark"><span class="toc-number">1.2.</span> <span class="toc-text">Paper2Poster Benchmark</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#data-curation"><span class="toc-number">1.2.1.</span> <span class="toc-text">Data curation</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#evaluation-metrics"><span class="toc-number">1.2.2.</span> <span class="toc-text">Evaluation Metrics</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A7%86%E8%A7%89%E8%B4%A8%E9%87%8F%E6%8C%87%E6%A0%87-visual-quality-metrics"><span class="toc-number">1.2.2.1.</span> <span class="toc-text">视觉质量指标 (Visual
+Quality Metrics)</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%A7%86%E8%A7%89%E7%9B%B8%E4%BC%BC%E5%BA%A6-visual-similarity"><span class="toc-number">1.2.2.1.1.</span> <span class="toc-text">视觉相似度 (Visual
+Similarity)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%9B%BE%E8%A1%A8%E7%9B%B8%E5%85%B3%E6%80%A7-figure-relevance"><span class="toc-number">1.2.2.1.2.</span> <span class="toc-text">图表相关性 (Figure Relevance)</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#textual-coherence-%E6%96%87%E6%9C%AC%E8%BF%9E%E8%B4%AF%E6%80%A7"><span class="toc-number">1.2.2.2.</span> <span class="toc-text">Textual Coherence
+(文本连贯性)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#vlm%E8%BF%9B%E8%A1%8C%E6%95%B4%E4%BD%93%E8%AF%84%E4%BC%B0"><span class="toc-number">1.2.2.3.</span> <span class="toc-text">VLM进行整体评估</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%A4%E5%A4%A7%E7%B1%BB"><span class="toc-number">1.2.2.3.1.</span> <span class="toc-text">两大类：</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E5%AE%A1%E7%BE%8E%E5%88%86%E6%95%B0-aesthetic-score"><span class="toc-number">1.2.2.3.1.1.</span> <span class="toc-text">审美分数 (Aesthetic Score)：</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E4%BF%A1%E6%81%AF%E5%88%86%E6%95%B0-information-score"><span class="toc-number">1.2.2.3.1.2.</span> <span class="toc-text">信息分数 (Information Score)：</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#paper-quiz"><span class="toc-number">1.2.3.</span> <span class="toc-text">Paper Quiz</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#quiz%E9%97%AE%E9%A2%98%E7%9A%84%E7%94%9F%E6%88%90"><span class="toc-number">1.2.3.1.</span> <span class="toc-text">1. Quiz问题的生成</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#quiz%E9%97%AE%E9%A2%98%E7%9A%84%E5%9B%9E%E7%AD%94"><span class="toc-number">1.2.3.2.</span> <span class="toc-text">2. Quiz问题的回答</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AF%84%E4%BC%B0%E6%B5%B7%E6%8A%A5%E6%95%88%E6%9E%9C"><span class="toc-number">1.2.3.3.</span> <span class="toc-text">3. 评估海报效果</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%A1%E7%AE%97%E5%85%AC%E5%BC%8F"><span class="toc-number">1.2.3.4.</span> <span class="toc-text">4. 计算公式</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#paperagent"><span class="toc-number">1.3.</span> <span class="toc-text">PaperAgent</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#parser%E5%AF%B9%E4%BA%8Eposter%E8%BF%9B%E8%A1%8C%E7%B2%97%E7%B2%92%E5%BA%A6%E5%8E%8B%E7%BC%A9"><span class="toc-number">1.3.1.</span> <span class="toc-text">1.
+Parser：对于Poster进行粗粒度压缩</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#text-assets"><span class="toc-number">1.3.1.1.</span> <span class="toc-text">Text assets</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#visual-assets"><span class="toc-number">1.3.1.2.</span> <span class="toc-text">Visual assets</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#planner%E6%9E%84%E5%BB%BA%E6%B5%B7%E6%8A%A5"><span class="toc-number">1.3.2.</span> <span class="toc-text">2. Planner：构建海报</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#asset-matching"><span class="toc-number">1.3.2.1.</span> <span class="toc-text">Asset matching</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#layout-generation"><span class="toc-number">1.3.2.2.</span> <span class="toc-text">Layout generation</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#panel-iteration"><span class="toc-number">1.3.2.3.</span> <span class="toc-text">Panel iteration</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#paintercommenter"><span class="toc-number">1.3.3.</span> <span class="toc-text">3. Painter–Commenter</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%98%E5%9B%BE%E5%99%A8painter"><span class="toc-number">1.3.3.1.</span> <span class="toc-text">绘图器（Painter）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AF%84%E8%AE%BA%E5%99%A8commenter"><span class="toc-number">1.3.3.2.</span> <span class="toc-text">评论器（Commenter）</span></a></li></ol></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Posts</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/blogs/2025/10/02/Worldscore-0/" title="WordScore 论文解读">WordScore 论文解读</a><time datetime="2025-10-02T07:00:00.000Z" title="Created 2025-10-02 15:00:00">2025-10-02</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/blogs/2025/07/07/paper2poster/" title="Paper2poster 论文解读">Paper2poster 论文解读</a><time datetime="2025-07-07T08:23:58.000Z" title="Created 2025-07-07 16:23:58">2025-07-07</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/blogs/2025/07/06/vggt/" title="VGGT 论文解读">VGGT 论文解读</a><time datetime="2025-07-06T04:17:53.000Z" title="Created 2025-07-06 12:17:53">2025-07-06</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 By Hongbo Ma</span><span class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.0</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.1</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Reading Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Toggle Between Light and Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle Between Single-column and Double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="Settings"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back to Top"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/blogs/js/utils.js?v=5.5.1"></script><script src="/blogs/js/main.js?v=5.5.1"></script><div class="js-pjax"><script>(() => {
+  const loadMathjax = () => {
+    if (!window.MathJax) {
+      window.MathJax = {
+        loader: {
+          load: [
+            // Four font extension packages (optional)
+            //- '[tex]/bbm',
+            //- '[tex]/bboldx',
+            //- '[tex]/dsfont',
+            '[tex]/mhchem'
+          ],
+          paths: {
+            'mathjax-newcm': '[mathjax]/../@mathjax/mathjax-newcm-font',
+
+            //- // Four font extension packages (optional)
+            //- 'mathjax-bbm-extension': '[mathjax]/../@mathjax/mathjax-bbm-font-extension',
+            //- 'mathjax-bboldx-extension': '[mathjax]/../@mathjax/mathjax-bboldx-font-extension',
+            //- 'mathjax-dsfont-extension': '[mathjax]/../@mathjax/mathjax-dsfont-font-extension',
+            'mathjax-mhchem-extension': '[mathjax]/../@mathjax/mathjax-mhchem-font-extension'
+          }
+        },
+        output: {
+          font: 'mathjax-newcm',
+        },
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+          packages: {
+            '[+]': [
+              'mhchem'
+            ]
+          }
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          enableMenu: true,
+          menuOptions: {
+            settings: {
+              enrich: false  // Turn off Braille and voice narration text automatic generation
+            }
+          },
+          renderActions: {
+            findScript: [10, doc => {
+              for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                const display = !!node.type.match(/; *mode=display/)
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+                const text = document.createTextNode('')
+                node.parentNode.replaceChild(text, node)
+                math.start = {node: text, delim: '', n: 0}
+                math.end = {node: text, delim: '', n: 0}
+                doc.math.push(math)
+              }
+            }, '']
+          }
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = '/blogs/true'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.startup.document.state(0)
+      MathJax.texReset()
+      MathJax.typesetPromise()
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
